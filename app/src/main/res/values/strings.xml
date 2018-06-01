@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Movie Mania</string>
+    <string name="welcome_string">Welcome to Movie Mania</string>
+</resources>
