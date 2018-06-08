@@ -2,7 +2,11 @@ package app.moviemania.com.moviemania;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -41,7 +45,7 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
 
     //API URLs
     private static final String BASE_URL = "http://api.themoviedb.org/3";
-    private static final String API_KEY = "PLEASE CHECK ReadMe";
+    private static final String API_KEY = "211742f7f301a9352fcd87caf053db24";
     private static final String MODE_MOST_POPULAR = "/movie/popular";
     private static final String MODE_TOP_RATED = "/movie/top_rated";
     private static final String MOST_POPULAR = BASE_URL + MODE_MOST_POPULAR + "?api_key=" + API_KEY;
@@ -69,7 +73,6 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepage);
 
-
         Bundle loaderBundle = new Bundle();
         loaderBundle.putString(URL_KEY, MOST_POPULAR);
         loaderManager = getSupportLoaderManager();
@@ -89,6 +92,42 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         recyclerView.setAdapter(recyclerViewAdapter);
 
+    }
+
+    @Override
+    protected void onResume() {
+        if (!networkUnavailable()) {
+            showNoNetworkDialog();
+            return;
+        }
+        super.onResume();
+    }
+
+    private void showNoNetworkDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Uh-oh!")
+                .setMessage("Seems like you don't have network connection.")
+                .setPositiveButton("Turn On", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
+                        startActivity(settingsIntent);
+                    }
+                })
+                .setCancelable(false)
+                .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                })
+                .create().show();
+    }
+
+    private boolean networkUnavailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 
     @Override
@@ -179,7 +218,8 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<String> loader, String resultJson) {
-
+        if (movieList != null)
+            movieList.clear();
         if (progressBar.isShowing())
             progressBar.cancel();
 

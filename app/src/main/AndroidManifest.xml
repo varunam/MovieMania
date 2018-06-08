@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="app.moviemania.com.moviemania">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -20,7 +21,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HomepageActivity"></activity>
+        <activity android:name=".HomepageActivity" />
+        <activity android:name=".MovieDetailsActivity"></activity>
     </application>
 
 </manifest>
