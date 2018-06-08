@@ -68,34 +68,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 intent.putExtra(VOTE_AVG, movie.getVote_avg());
                 intent.putExtra(ADULT, movie.isAdult());
                 v.getContext().startActivity(intent);
-                /*View view = LayoutInflater.from(context).inflate(R.layout.layout_movie_details, null);
-                TextView title = view.findViewById(R.id.md_title_id);
-                TextView overview = view.findViewById(R.id.md_overview_id);
-                TextView votes = view.findViewById(R.id.md_votes);
-                TextView votes_avg = view.findViewById(R.id.md_vote_avg_id);
-                TextView language = view.findViewById(R.id.md_lang_id);
-                TextView release_date = view.findViewById(R.id.md_release_date_id);
-                TextView adult = view.findViewById(R.id.md_adult_id);
-                ImageView poster = view.findViewById(R.id.md_poster_id);
-                title.setText(movieList.get(position).getTitle());
-                overview.setText(movieList.get(position).getOverview());
-                votes.setText(movieList.get(position).getVotings() + " votes");
-                votes_avg.setText(movieList.get(position).getVote_avg() + "/10");
-                language.setText(movieList.get(position).getLanguage().toUpperCase());
-                release_date.setText(movieList.get(position).getRelease_date());
-                if (movieList.get(position).isAdult())
-                    adult.setText("A");
-                else
-                    adult.setText("AU/U");
-
-                Picasso.with(context).load(BASE_URL_IMAGE + SIZE + movieList.get(position).getPoster_path())
-                        .placeholder(R.drawable.movie_icon).into(poster);
-
-                AlertDialog dialog = new AlertDialog.Builder(context)
-                        .setView(view).setCancelable(true).create();
-
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                dialog.show();*/
             }
         });
 

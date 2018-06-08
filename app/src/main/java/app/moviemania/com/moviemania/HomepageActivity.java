@@ -45,7 +45,7 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
 
     //API URLs
     private static final String BASE_URL = "http://api.themoviedb.org/3";
-    private static final String API_KEY = "211742f7f301a9352fcd87caf053db24";
+    private static final String API_KEY = "Please check read me for api key";
     private static final String MODE_MOST_POPULAR = "/movie/popular";
     private static final String MODE_TOP_RATED = "/movie/top_rated";
     private static final String MOST_POPULAR = BASE_URL + MODE_MOST_POPULAR + "?api_key=" + API_KEY;
