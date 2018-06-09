@@ -14,19 +14,11 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import static app.moviemania.com.moviemania.Constants.ADULT;
-import static app.moviemania.com.moviemania.Constants.LANGUAGE;
-import static app.moviemania.com.moviemania.Constants.OVERVIEW;
-import static app.moviemania.com.moviemania.Constants.RELEASE_DATE;
-import static app.moviemania.com.moviemania.Constants.THUMBNAIL;
-import static app.moviemania.com.moviemania.Constants.TITLE;
-import static app.moviemania.com.moviemania.Constants.VOTE_AVG;
-import static app.moviemania.com.moviemania.Constants.VOTINGS;
-
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
-    private static final String BASE_URL_IMAGE = "http://image.tmdb.org/t/p";
-    private static final String SIZE = "/w185";
+    static final String BASE_URL_IMAGE = "http://image.tmdb.org/t/p";
+    static final String SIZE = "/w185";
+    static final String MOVIE_KEY = "movie-key";
 
     private Context context;
     private List<Movie> movieList;
@@ -59,14 +51,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             public void onClick(View v) {
                 Movie movie = movieList.get(position);
                 Intent intent = new Intent(v.getContext(), MovieDetailsActivity.class);
-                intent.putExtra(TITLE, movie.getTitle());
-                intent.putExtra(OVERVIEW, movie.getOverview());
-                intent.putExtra(THUMBNAIL, BASE_URL_IMAGE + SIZE + movieList.get(position).getPoster_path());
-                intent.putExtra(LANGUAGE, movie.getLanguage());
-                intent.putExtra(RELEASE_DATE, movie.getRelease_date());
-                intent.putExtra(VOTINGS, movie.getVotings());
-                intent.putExtra(VOTE_AVG, movie.getVote_avg());
-                intent.putExtra(ADULT, movie.isAdult());
+                intent.putExtra(MOVIE_KEY, movie);
                 v.getContext().startActivity(intent);
             }
         });

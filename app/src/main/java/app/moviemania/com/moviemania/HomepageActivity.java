@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,7 +46,7 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
 
     //API URLs
     private static final String BASE_URL = "http://api.themoviedb.org/3";
-    private static final String API_KEY = "Please check read me for api key";
+    private static final String API_KEY = "Please refer readme";
     private static final String MODE_MOST_POPULAR = "/movie/popular";
     private static final String MODE_TOP_RATED = "/movie/top_rated";
     private static final String MOST_POPULAR = BASE_URL + MODE_MOST_POPULAR + "?api_key=" + API_KEY;
@@ -67,6 +68,7 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
     private RecyclerView recyclerView;
     private List<Movie> movieList;
     private android.support.v4.app.LoaderManager loaderManager;
+    private Loader<String> loader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,31 +78,38 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
         Bundle loaderBundle = new Bundle();
         loaderBundle.putString(URL_KEY, MOST_POPULAR);
         loaderManager = getSupportLoaderManager();
-        Loader<String> loader = loaderManager.getLoader(LOADER_ID);
+        loader = loaderManager.getLoader(LOADER_ID);
         progressBar = new ProgressDialog(this);
-
-        if (loader == null)
-            loaderManager.initLoader(LOADER_ID, loaderBundle, this);
-        else
-            loaderManager.restartLoader(LOADER_ID, loaderBundle, this);
-
         recyclerView = findViewById(R.id.recyclerViewID);
-
+        recyclerViewAdapter = new RecyclerViewAdapter(this, movieList);
         movieList = new ArrayList<>();
 
-        recyclerViewAdapter = new RecyclerViewAdapter(this, movieList);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-        recyclerView.setAdapter(recyclerViewAdapter);
+        if (!networkUnavailable())
+            showNoNetworkDialog();
+        else {
+            if (loader == null)
+                loaderManager.initLoader(LOADER_ID, loaderBundle, this);
+            else
+                loaderManager.restartLoader(LOADER_ID, loaderBundle, this);
+
+            recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+            recyclerView.setAdapter(recyclerViewAdapter);
+        }
 
     }
 
     @Override
     protected void onResume() {
-        if (!networkUnavailable()) {
-            showNoNetworkDialog();
-            return;
-        }
         super.onResume();
+        if(networkUnavailable())
+        {
+            Toast.makeText(getApplicationContext(),"Available",Toast.LENGTH_LONG).show();
+            //Need help on how to load data on below use case
+            // 1. User opens app when there is no internet
+            // 2. User clicks on TURN ON button on screen, turns on data and comes back
+            // 3. It will be just a blank screen. If user selects option from menu, app crashes.
+            // 4. please help on how to load data here
+        }
     }
 
     private void showNoNetworkDialog() {
@@ -114,7 +123,6 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
                         startActivity(settingsIntent);
                     }
                 })
-                .setCancelable(false)
                 .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -144,10 +152,14 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
                     .setPositiveButton(MOST_POPULAR_STRING, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            movieList.clear();
+                            if (movieList != null)
+                                movieList.clear();
                             Bundle loaderBundle = new Bundle();
                             loaderBundle.putString(URL_KEY, MOST_POPULAR);
-                            loaderManager.restartLoader(LOADER_ID, loaderBundle, HomepageActivity.this);
+                            if (loader == null)
+                                loaderManager.initLoader(LOADER_ID, loaderBundle, HomepageActivity.this);
+                            else
+                                loaderManager.restartLoader(LOADER_ID, loaderBundle, HomepageActivity.this);
                         }
                     })
                     .setNegativeButton(MOST_RATED_STRING, new DialogInterface.OnClickListener() {
@@ -156,7 +168,10 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
                             movieList.clear();
                             Bundle loaderBundle = new Bundle();
                             loaderBundle.putString(URL_KEY, TOP_RATED);
-                            loaderManager.restartLoader(LOADER_ID, loaderBundle, HomepageActivity.this);
+                            if (loaderManager == null)
+                                loaderManager.initLoader(LOADER_ID, loaderBundle, HomepageActivity.this);
+                            else
+                                loaderManager.restartLoader(LOADER_ID, loaderBundle, HomepageActivity.this);
                         }
                     })
                     .setCancelable(false)

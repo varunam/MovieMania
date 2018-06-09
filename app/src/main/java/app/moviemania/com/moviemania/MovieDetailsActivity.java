@@ -9,14 +9,9 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import static app.moviemania.com.moviemania.Constants.ADULT;
-import static app.moviemania.com.moviemania.Constants.LANGUAGE;
-import static app.moviemania.com.moviemania.Constants.OVERVIEW;
-import static app.moviemania.com.moviemania.Constants.RELEASE_DATE;
-import static app.moviemania.com.moviemania.Constants.THUMBNAIL;
-import static app.moviemania.com.moviemania.Constants.TITLE;
-import static app.moviemania.com.moviemania.Constants.VOTE_AVG;
-import static app.moviemania.com.moviemania.Constants.VOTINGS;
+import static app.moviemania.com.moviemania.RecyclerViewAdapter.BASE_URL_IMAGE;
+import static app.moviemania.com.moviemania.RecyclerViewAdapter.MOVIE_KEY;
+import static app.moviemania.com.moviemania.RecyclerViewAdapter.SIZE;
 
 public class MovieDetailsActivity extends AppCompatActivity {
 
@@ -37,43 +32,30 @@ public class MovieDetailsActivity extends AppCompatActivity {
         adultText = findViewById(R.id.md_adult_id);
         posterImage = findViewById(R.id.md_poster_id);
 
-        Bundle bundle = getIntent().getExtras();
-        String title = "Error loading!", overview = "Error loading!", releaseDate = "Error loading!", lang = "Error loading!", poster = "Error loading!";
-        int votings = 0;
-        double vote_avg = 0;
-        boolean adult = false;
-        if (bundle != null) {
-            title = bundle.getString(TITLE);
-            overview = bundle.getString(OVERVIEW);
-            releaseDate = bundle.getString(RELEASE_DATE);
-            lang = bundle.getString(LANGUAGE);
-            votings = bundle.getInt(VOTINGS);
-            vote_avg = bundle.getDouble(VOTE_AVG);
-            adult = bundle.getBoolean(ADULT);
-            poster = bundle.getString(THUMBNAIL);
-        }
+        Movie movie = getIntent().getParcelableExtra(MOVIE_KEY);
+        if (movie != null) {
+            titleText.setText(movie.getTitle());
+            overviewText.setText(movie.getOverview());
+            langText.setText(movie.getLanguage().toUpperCase());
+            release_dateText.setText(movie.getRelease_date());
+            votingsText.setText(movie.getVotings() + " votes");
+            vote_avgText.setText(movie.getVote_avg() + "");
+            if (movie.isAdult())
+                adultText.setText("A");
+            else
+                adultText.setText("AU/U");
 
-        titleText.setText(title);
-        overviewText.setText(overview);
-        langText.setText(lang.toUpperCase());
-        release_dateText.setText(releaseDate);
-        votingsText.setText(votings + " votes");
-        vote_avgText.setText(vote_avg + "");
-        if (adult)
-            adultText.setText("A");
-        else
-            adultText.setText("AU/U");
+            Picasso.with(this)
+                    .load(BASE_URL_IMAGE + SIZE + movie.getPoster_path())
+                    .placeholder(android.R.drawable.stat_notify_error)
+                    .error(R.drawable.movie_icon)
+                    .into(posterImage);
 
-        Picasso.with(this)
-                .load(poster)
-                .placeholder(android.R.drawable.stat_notify_error)
-                .error(R.drawable.movie_icon)
-                .into(posterImage);
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(title);
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(movie.getTitle());
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
         }
     }
 
