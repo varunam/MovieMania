@@ -46,7 +46,7 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
 
     //API URLs
     private static final String BASE_URL = "http://api.themoviedb.org/3";
-    private static final String API_KEY = "Please refer readme";
+    private static final String API_KEY = "211742f7f301a9352fcd87caf053db24";
     private static final String MODE_MOST_POPULAR = "/movie/popular";
     private static final String MODE_TOP_RATED = "/movie/top_rated";
     private static final String MOST_POPULAR = BASE_URL + MODE_MOST_POPULAR + "?api_key=" + API_KEY;
@@ -81,8 +81,6 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
         loader = loaderManager.getLoader(LOADER_ID);
         progressBar = new ProgressDialog(this);
         recyclerView = findViewById(R.id.recyclerViewID);
-        recyclerViewAdapter = new RecyclerViewAdapter(this, movieList);
-        movieList = new ArrayList<>();
 
         if (!networkUnavailable())
             showNoNetworkDialog();
@@ -92,37 +90,18 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
             else
                 loaderManager.restartLoader(LOADER_ID, loaderBundle, this);
 
+            movieList = new ArrayList<>();
+            recyclerViewAdapter = new RecyclerViewAdapter(this, movieList);
             recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
             recyclerView.setAdapter(recyclerViewAdapter);
         }
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(networkUnavailable())
-        {
-            Toast.makeText(getApplicationContext(),"Available",Toast.LENGTH_LONG).show();
-            //Need help on how to load data on below use case
-            // 1. User opens app when there is no internet
-            // 2. User clicks on TURN ON button on screen, turns on data and comes back
-            // 3. It will be just a blank screen. If user selects option from menu, app crashes.
-            // 4. please help on how to load data here
-        }
-    }
-
     private void showNoNetworkDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Uh-oh!")
                 .setMessage("Seems like you don't have network connection.")
-                .setPositiveButton("Turn On", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
-                        startActivity(settingsIntent);
-                    }
-                })
                 .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
