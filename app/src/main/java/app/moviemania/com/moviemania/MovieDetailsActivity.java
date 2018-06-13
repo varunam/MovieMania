@@ -113,7 +113,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 adultText.setText("(AU/U)");
             long id = movie.getId();
             String framedUrl = BASE_URL + MOVIE + id + VIDEO + API_KEY;
-            //new LoadTrailerLinks(framedUrl).execute();
+            new LoadTrailerLinks(framedUrl).execute();
             String framedReviewsUrl = BASE_URL + MOVIE + id + REVIEWS + API_KEY;
             new LoadReviews(framedReviewsUrl).execute(REVIEWS);
             Log.e(TAG, "Creating connection to " + framedUrl + " in the background");
