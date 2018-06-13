@@ -9,9 +9,13 @@ public class Movie implements Parcelable {
     private static final String TAG = "Parcel";
 
     private String title, poster_path, language, overview, release_date;
-    private int votings;
+    private int votings, id;
     private double vote_avg;
     private boolean adult;
+
+    public Movie() {
+
+    }
 
     protected Movie(Parcel in) {
         title = in.readString();
@@ -22,6 +26,7 @@ public class Movie implements Parcelable {
         votings = in.readInt();
         vote_avg = in.readDouble();
         adult = in.readByte() != 0;
+        id = in.readInt();
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
@@ -35,10 +40,6 @@ public class Movie implements Parcelable {
             return new Movie[size];
         }
     };
-
-    public Movie() {
-
-    }
 
     public String getTitle() {
         return title;
@@ -123,6 +124,15 @@ public class Movie implements Parcelable {
         if (adult)
             dest.writeInt(1);
         else
-            dest.writeDouble(0);
+            dest.writeInt(0);
+        dest.writeInt(id);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

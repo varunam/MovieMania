@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">Movie Mania</string>
     <string name="welcome_string">Welcome to Movie Mania</string>
+    <string name="trailer_3"><u>Trailer 3</u></string>
+    <string name="trailer_2"><u>Trailer 2</u></string>
+    <string name="trailer_1"><u>Trailer 1</u></string>
+    <string name="votes_default_text">Votes: 123456</string>
+    <string name="rating_default_text">79%</string>
+    <string name="movie_default">Movie logo</string>
+    <string name="adult_default">(AU)</string>
+    <string name="reviews"><u>reviews</u></string>
 </resources>

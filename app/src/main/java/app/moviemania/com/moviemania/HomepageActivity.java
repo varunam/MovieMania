@@ -2,11 +2,9 @@ package app.moviemania.com.moviemania;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -17,7 +15,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,20 +37,20 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
     private static final String MOST_RATED_STRING = "Most Rated";
     private static final String SELECT_FILTER = "Select Filter";
 
-    private static final String REQUEST_GET = "GET";
-    private static final String ACCEPT = "accept";
-    private static final String ACCEPT_JSON = "application/json";
+    public static final String REQUEST_GET = "GET";
+    public static final String ACCEPT = "accept";
+    public static final String ACCEPT_JSON = "application/json";
 
     //API URLs
-    private static final String BASE_URL = "http://api.themoviedb.org/3";
-    private static final String API_KEY = "211742f7f301a9352fcd87caf053db24";
+    public static final String BASE_URL = "http://api.themoviedb.org/3";
+    public static final String API_KEY = "?api_key=211742f7f301a9352fcd87caf053db24";
     private static final String MODE_MOST_POPULAR = "/movie/popular";
     private static final String MODE_TOP_RATED = "/movie/top_rated";
-    private static final String MOST_POPULAR = BASE_URL + MODE_MOST_POPULAR + "?api_key=" + API_KEY;
-    private static final String TOP_RATED = BASE_URL + MODE_TOP_RATED + "?api_key=" + API_KEY;
+    private static final String MOST_POPULAR = BASE_URL + MODE_MOST_POPULAR + API_KEY;
+    private static final String TOP_RATED = BASE_URL + MODE_TOP_RATED + API_KEY;
 
     //related to json
-    private static final String RESULTS = "results";
+    public static final String RESULTS = "results";
     private static final String VOTE_COUNT = "vote_count";
     private static final String VOTE_AVERAGE = "vote_average";
     private static final String TITLE = "title";
@@ -62,6 +59,7 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
     private static final String ADULT = "adult";
     private static final String RELEASE_DATE = "release_date";
     private static final String OVERVIEW = "overview";
+    private static final String ID = "id";
 
     private RecyclerViewAdapter recyclerViewAdapter;
     private ProgressDialog progressBar;
@@ -230,6 +228,7 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
                 boolean adult = Boolean.parseBoolean(movieObject.getString(ADULT));
                 String released_date = movieObject.getString(RELEASE_DATE);
                 String language = movieObject.getString(LANGUAGE);
+                int id = movieObject.getInt(ID);
 
                 Log.e(TAG, "Retrieved Details:\n" +
                         TITLE + " " + title + "\n" +
@@ -238,7 +237,8 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
                         VOTE_AVERAGE + " " + vote_avg + "\n" +
                         POSTER_PATH + " " + poster_path + "\n" +
                         ADULT + " " + adult + "\n" +
-                        RELEASE_DATE + " " + released_date + "\n");
+                        RELEASE_DATE + " " + released_date + "\n" +
+                        ID + " " + id + "\n");
 
                 Movie movie = new Movie();
                 movie.setTitle(title);
@@ -249,6 +249,7 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
                 movie.setPoster_path(poster_path);
                 movie.setAdult(adult);
                 movie.setRelease_date(released_date);
+                movie.setId(id);
 
                 movieList.add(movie);
                 recyclerViewAdapter.notifyDataSetChanged();

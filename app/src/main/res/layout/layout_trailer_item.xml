@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="40dp">
+
+    <TextView
+        android:id="@+id/trailer_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:visibility="visible"
+        android:fontFamily="serif"
+        android:gravity="center"
+        android:text="@string/trailer_1"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+</FrameLayout>
