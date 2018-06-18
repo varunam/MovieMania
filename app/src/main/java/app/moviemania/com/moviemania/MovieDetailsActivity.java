@@ -1,5 +1,6 @@
 package app.moviemania.com.moviemania;
 
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -10,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +30,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import app.moviemania.com.moviemania.database.MoviesDatabase;
 
 import static app.moviemania.com.moviemania.HomepageActivity.ACCEPT;
 import static app.moviemania.com.moviemania.HomepageActivity.ACCEPT_JSON;
@@ -50,9 +54,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private static final String KEY = "key";
     private static final String AUTHOR = "author";
     private static final String CONTENT = "content";
+    private static final String REMOVE_FROM_FAVOURITES = "Remove from favourites";
+    private static final String MARK_AS_FAVOURITE = "Mark as favourite";
 
     private TextView titleText, overviewText, release_dateText, langText, votingsText, vote_avgText, adultText, reviews;
     private ImageView posterImage;
+    private Button favouriteButton;
     private List<String> trailers;
     private List<Review> reviewList;
     private TrailersAdapter trailersAdapter;
@@ -60,11 +67,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     RecyclerView reviewsRecyclerView;
 
+    private AppExecutors appExecutors;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movide_details);
+        setContentView(R.layout.activity_movie_details);
 
         titleText = findViewById(R.id.md_title_id);
         overviewText = findViewById(R.id.md_overview_id);
@@ -77,6 +86,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.trailers_recyclerViewid);
         reviews = findViewById(R.id.md_reviews_id);
         reviewList = new ArrayList<>();
+        favouriteButton = findViewById(R.id.favouriteID);
+        appExecutors = AppExecutors.getInstance(getApplicationContext());
 
         reviews.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,7 +108,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
             }
         });
 
-        Movie movie = getIntent().getParcelableExtra(MOVIE_KEY);
+        final Movie movie = getIntent().getParcelableExtra(MOVIE_KEY);
         if (movie != null) {
             titleText.setText(movie.getTitle());
             overviewText.setText(movie.getOverview());
@@ -111,6 +122,28 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 adultText.setText("(A)");
             else
                 adultText.setText("(AU/U)");
+
+            appExecutors.diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    final Cursor Itemid = MoviesDatabase.getInstance(getApplicationContext()).movieDao().getMovieID(movie.getId());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (Itemid.getCount() >= 1) {
+                                //Toast.makeText(getApplicationContext(),"Favourite",Toast.LENGTH_LONG).show();
+                                favouriteButton.setText(REMOVE_FROM_FAVOURITES);
+                                favouriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.bookmarked, 0, 0, 0);
+                            } else {
+                                //Toast.makeText(getApplicationContext(),"Not Favourite",Toast.LENGTH_LONG).show();
+                                favouriteButton.setText(MARK_AS_FAVOURITE);
+                                favouriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.bookmark_removed, 0, 0, 0);
+                            }
+                        }
+                    });
+                }
+            });
+
             long id = movie.getId();
             String framedUrl = BASE_URL + MOVIE + id + VIDEO + API_KEY;
             new LoadTrailerLinks(framedUrl).execute();
@@ -130,6 +163,45 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
         }
+
+        favouriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (movie != null) {
+                    if (favouriteButton.getText().equals(REMOVE_FROM_FAVOURITES)) {
+                        appExecutors.diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                MoviesDatabase.getInstance(getApplicationContext()).movieDao().deleteMovie(movie);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "Bookmark removed", Toast.LENGTH_LONG).show();
+                                        favouriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.bookmark_removed, 0, 0, 0);
+                                        favouriteButton.setText(MARK_AS_FAVOURITE);
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        appExecutors.diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                MoviesDatabase.getInstance(getApplicationContext()).movieDao().insertMovie(movie);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "Bookmarked movie", Toast.LENGTH_LONG).show();
+                                        favouriteButton.setText(REMOVE_FROM_FAVOURITES);
+                                        favouriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.bookmarked, 0, 0, 0);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 
     @Override

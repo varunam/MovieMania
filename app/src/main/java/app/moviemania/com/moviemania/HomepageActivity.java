@@ -1,10 +1,13 @@
 package app.moviemania.com.moviemania;
 
 import android.app.ProgressDialog;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -35,6 +38,8 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
     private static final String TAG = "HomePageActivity";
     private static final String MOST_POPULAR_STRING = "Most Popular";
     private static final String MOST_RATED_STRING = "Most Rated";
+    private static final String FAVOURITES_STRING = "Favourites";
+    private static final String CHOSEN_OPTION_KEY = "chosen";
     private static final String SELECT_FILTER = "Select Filter";
 
     public static final String REQUEST_GET = "GET";
@@ -67,6 +72,9 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
     private List<Movie> movieList;
     private android.support.v4.app.LoaderManager loaderManager;
     private Loader<String> loader;
+    private AppExecutors appExecutors;
+
+    private boolean option_popular = false, option_rated = false, option_favourite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,26 +82,59 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
         setContentView(R.layout.activity_homepage);
 
         Bundle loaderBundle = new Bundle();
-        loaderBundle.putString(URL_KEY, MOST_POPULAR);
         loaderManager = getSupportLoaderManager();
+        loaderBundle.putString(URL_KEY, MOST_POPULAR);
         loader = loaderManager.getLoader(LOADER_ID);
         progressBar = new ProgressDialog(this);
         recyclerView = findViewById(R.id.recyclerViewID);
+        appExecutors = AppExecutors.getInstance(getApplicationContext());
+        movieList = new ArrayList<>();
+        recyclerViewAdapter = new RecyclerViewAdapter(this, movieList);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        recyclerView.setAdapter(recyclerViewAdapter);
 
         if (!networkUnavailable())
             showNoNetworkDialog();
-        else {
-            if (loader == null)
-                loaderManager.initLoader(LOADER_ID, loaderBundle, this);
-            else
-                loaderManager.restartLoader(LOADER_ID, loaderBundle, this);
-
-            movieList = new ArrayList<>();
-            recyclerViewAdapter = new RecyclerViewAdapter(this, movieList);
-            recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-            recyclerView.setAdapter(recyclerViewAdapter);
+        else if (savedInstanceState != null) {
+            String chosen_option = savedInstanceState.getString(CHOSEN_OPTION_KEY);
+            if (chosen_option != null)
+                switch (chosen_option) {
+                    case MOST_POPULAR_STRING:
+                        loaderBundle.putString(URL_KEY, MOST_POPULAR);
+                        setChosenOption(MOST_POPULAR_STRING);
+                        loadData(loaderBundle);
+                        break;
+                    case MOST_RATED_STRING:
+                        loaderBundle.putString(URL_KEY, TOP_RATED);
+                        setChosenOption(MOST_RATED_STRING);
+                        loadData(loaderBundle);
+                        break;
+                    case FAVOURITES_STRING:
+                        loadFavouriteMovies();
+                }
+        } else {
+            loadData(loaderBundle);
         }
+    }
 
+    private void loadData(Bundle loaderBundle) {
+        if (loader == null)
+            loaderManager.initLoader(LOADER_ID, loaderBundle, this);
+        else
+            loaderManager.restartLoader(LOADER_ID, loaderBundle, this);
+    }
+
+    private void loadFavouriteMovies() {
+        MainViewModel mainViewModel = ViewModelProviders.of(HomepageActivity.this).get(MainViewModel.class);
+        mainViewModel.getMovies().observe(HomepageActivity.this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                Log.e(TAG, "Receiving database update from LiveData in ViewModel...");
+                recyclerViewAdapter.setMovieList(movies);
+                recyclerViewAdapter.notifyDataSetChanged();
+            }
+        });
+        setChosenOption(FAVOURITES_STRING);
     }
 
     private void showNoNetworkDialog() {
@@ -124,37 +165,78 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.filterID) {
-            new AlertDialog.Builder(this)
+            AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle(SELECT_FILTER)
                     .setPositiveButton(MOST_POPULAR_STRING, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            setChosenOption(MOST_POPULAR_STRING);
                             if (movieList != null)
                                 movieList.clear();
                             Bundle loaderBundle = new Bundle();
                             loaderBundle.putString(URL_KEY, MOST_POPULAR);
-                            if (loader == null)
-                                loaderManager.initLoader(LOADER_ID, loaderBundle, HomepageActivity.this);
-                            else
-                                loaderManager.restartLoader(LOADER_ID, loaderBundle, HomepageActivity.this);
+                            loadData(loaderBundle);
                         }
                     })
                     .setNegativeButton(MOST_RATED_STRING, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            setChosenOption(MOST_RATED_STRING);
                             movieList.clear();
                             Bundle loaderBundle = new Bundle();
                             loaderBundle.putString(URL_KEY, TOP_RATED);
-                            if (loaderManager == null)
-                                loaderManager.initLoader(LOADER_ID, loaderBundle, HomepageActivity.this);
-                            else
-                                loaderManager.restartLoader(LOADER_ID, loaderBundle, HomepageActivity.this);
+                            loadData(loaderBundle);
                         }
                     })
                     .setCancelable(false)
-                    .create().show();
+                    .create();
+            dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Favourites", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    loadFavouriteMovies();
+                }
+            });
+            dialog.show();
         }
         return true;
+    }
+
+    private String getChosenOption() {
+        String result;
+        if (option_rated)
+            result = MOST_RATED_STRING;
+        else if (option_favourite)
+            result = FAVOURITES_STRING;
+        else
+            result = MOST_POPULAR_STRING;
+
+        Log.e(TAG, "Returning chosen option: " + result);
+        return result;
+    }
+
+    private void setChosenOption(String OPTION) {
+        switch (OPTION) {
+            case MOST_POPULAR_STRING:
+                option_popular = true;
+                option_favourite = false;
+                option_rated = false;
+                break;
+            case MOST_RATED_STRING:
+                option_popular = false;
+                option_favourite = false;
+                option_rated = true;
+                break;
+            case FAVOURITES_STRING:
+                option_popular = false;
+                option_favourite = true;
+                option_rated = false;
+                break;
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(CHOSEN_OPTION_KEY, getChosenOption());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -252,6 +334,7 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
                 movie.setId(id);
 
                 movieList.add(movie);
+                recyclerViewAdapter.setMovieList(movieList);
                 recyclerViewAdapter.notifyDataSetChanged();
             }
         } catch (JSONException e) {

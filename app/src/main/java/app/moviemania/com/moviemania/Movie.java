@@ -1,23 +1,43 @@
 package app.moviemania.com.moviemania;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+@Entity(tableName = "MoviesTable")
 public class Movie implements Parcelable {
 
     private static final String TAG = "Parcel";
 
     private String title, poster_path, language, overview, release_date;
-    private int votings, id;
+    private int votings;
+    @PrimaryKey
+    private int id;
     private double vote_avg;
     private boolean adult;
 
+    @Ignore
     public Movie() {
 
     }
 
-    protected Movie(Parcel in) {
+    public Movie(int id, String title, String overview, String language, String release_date, String poster_path, int votings, double vote_avg, boolean adult) {
+        this.id = id;
+        this.title = title;
+        this.overview = overview;
+        this.language = language;
+        this.release_date = release_date;
+        this.poster_path = poster_path;
+        this.votings = votings;
+        this.vote_avg = vote_avg;
+        this.adult = adult;
+    }
+
+    @Ignore
+    public Movie(Parcel in) {
         title = in.readString();
         poster_path = in.readString();
         language = in.readString();
@@ -135,4 +155,5 @@ public class Movie implements Parcelable {
     public void setId(int id) {
         this.id = id;
     }
+
 }

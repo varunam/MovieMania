@@ -9,4 +9,5 @@
     <string name="movie_default">Movie logo</string>
     <string name="adult_default">(AU)</string>
     <string name="reviews"><u>reviews</u></string>
+    <string name="favourite">Mark as Favourite</string>
 </resources>

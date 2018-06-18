@@ -79,4 +79,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         }
     }
+
+    public void setMovieList(List<Movie> movieList) {
+        this.movieList = movieList;
+    }
 }
