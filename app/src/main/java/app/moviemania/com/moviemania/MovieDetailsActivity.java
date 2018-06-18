@@ -1,8 +1,10 @@
 package app.moviemania.com.moviemania;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -58,7 +60,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private static final String MARK_AS_FAVOURITE = "Mark as favourite";
 
     private TextView titleText, overviewText, release_dateText, langText, votingsText, vote_avgText, adultText, reviews;
-    private ImageView posterImage;
+    private ImageView posterImage, shareTrailer;
     private Button favouriteButton;
     private List<String> trailers;
     private List<Review> reviewList;
@@ -85,6 +87,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         posterImage = findViewById(R.id.md_poster_id);
         recyclerView = findViewById(R.id.trailers_recyclerViewid);
         reviews = findViewById(R.id.md_reviews_id);
+        shareTrailer = findViewById(R.id.shareTrailerID);
         reviewList = new ArrayList<>();
         favouriteButton = findViewById(R.id.favouriteID);
         appExecutors = AppExecutors.getInstance(getApplicationContext());
@@ -199,6 +202,22 @@ public class MovieDetailsActivity extends AppCompatActivity {
                             }
                         });
                     }
+                }
+            }
+        });
+
+        shareTrailer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(trailers.get(0)==null)
+                    Toast.makeText(getApplicationContext(),"No trailers found",Toast.LENGTH_LONG).show();
+                else
+                {
+                    ShareCompat.IntentBuilder.from(MovieDetailsActivity.this)
+                            .setChooserTitle("Share movie")
+                            .setText("I found this movie intersting. why don't you check it out? \n\n" + trailers.get(0))
+                            .setType("text/plain")
+                            .startChooser();
                 }
             }
         });
