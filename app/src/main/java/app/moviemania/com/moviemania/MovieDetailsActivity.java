@@ -1,6 +1,5 @@
 package app.moviemania.com.moviemania;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -209,10 +208,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         shareTrailer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(trailers.get(0)==null)
-                    Toast.makeText(getApplicationContext(),"No trailers found",Toast.LENGTH_LONG).show();
-                else
-                {
+                if (trailers.get(0) == null)
+                    Toast.makeText(getApplicationContext(), "No trailers found", Toast.LENGTH_LONG).show();
+                else {
                     ShareCompat.IntentBuilder.from(MovieDetailsActivity.this)
                             .setChooserTitle("Share movie")
                             .setText("I found this movie intersting. why don't you check it out? \n\n" + trailers.get(0))
