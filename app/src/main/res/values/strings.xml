@@ -7,7 +7,8 @@
     <string name="votes_default_text">Votes: 123456</string>
     <string name="rating_default_text">79%</string>
     <string name="movie_default">Movie logo</string>
-    <string name="adult_default">(AU)</string>
-    <string name="reviews"><u>reviews</u></string>
+    <string name="adult_default">AU</string>
+    <string name="reviews">reviews></string>
     <string name="favourite">Mark as Favourite</string>
+    <string name="trailers">Exclusive Videos</string>
 </resources>

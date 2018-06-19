@@ -174,8 +174,8 @@ public class HomepageActivity extends AppCompatActivity implements LoaderManager
 
     private void showNoNetworkDialog(final String category) {
         new AlertDialog.Builder(this)
-                .setTitle("Uh-oh!")
-                .setMessage("Seems like you don't have network connection.")
+                .setTitle("Are you offline?")
+                .setMessage("Seems like you don't have an active network connection.")
                 .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

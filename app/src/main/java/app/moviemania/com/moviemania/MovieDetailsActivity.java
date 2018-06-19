@@ -1,6 +1,8 @@
 package app.moviemania.com.moviemania;
 
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ShareCompat;
@@ -40,9 +42,7 @@ import static app.moviemania.com.moviemania.HomepageActivity.API_KEY;
 import static app.moviemania.com.moviemania.HomepageActivity.BASE_URL;
 import static app.moviemania.com.moviemania.HomepageActivity.REQUEST_GET;
 import static app.moviemania.com.moviemania.HomepageActivity.RESULTS;
-import static app.moviemania.com.moviemania.RecyclerViewAdapter.BASE_URL_IMAGE;
 import static app.moviemania.com.moviemania.RecyclerViewAdapter.MOVIE_KEY;
-import static app.moviemania.com.moviemania.RecyclerViewAdapter.SIZE;
 
 public class MovieDetailsActivity extends AppCompatActivity {
 
@@ -57,9 +57,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private static final String CONTENT = "content";
     private static final String REMOVE_FROM_FAVOURITES = "Remove from favourites";
     private static final String MARK_AS_FAVOURITE = "Mark as favourite";
+    private static String THUMBNAIL_URL = "https://img.youtube.com/vi/";
 
-    private TextView titleText, overviewText, release_dateText, langText, votingsText, vote_avgText, adultText, reviews;
-    private ImageView posterImage, shareTrailer;
+    private TextView titleText, overviewText, release_dateText, votingsText, vote_avgText, adultText, reviews, shareTrailer;
+    private ImageView movieThumbnail, playicon;
     private Button favouriteButton;
     private List<String> trailers;
     private List<Review> reviewList;
@@ -79,15 +80,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
         titleText = findViewById(R.id.md_title_id);
         overviewText = findViewById(R.id.md_overview_id);
         release_dateText = findViewById(R.id.md_release_date_id);
-        langText = findViewById(R.id.md_lang_id);
+        //langText = findViewById(R.id.md_lang_id);
         votingsText = findViewById(R.id.md_votes);
         vote_avgText = findViewById(R.id.md_vote_avg_id);
         adultText = findViewById(R.id.md_adult_id);
-        posterImage = findViewById(R.id.md_poster_id);
+        //posterImage = findViewById(R.id.md_poster_id);
         recyclerView = findViewById(R.id.trailers_recyclerViewid);
         reviews = findViewById(R.id.md_reviews_id);
         shareTrailer = findViewById(R.id.shareTrailerID);
         reviewList = new ArrayList<>();
+        movieThumbnail = findViewById(R.id.movieThumbnailID);
+        playicon = findViewById(R.id.play_icon_id);
         favouriteButton = findViewById(R.id.favouriteID);
         appExecutors = AppExecutors.getInstance(getApplicationContext());
 
@@ -114,7 +117,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         if (movie != null) {
             titleText.setText(movie.getTitle());
             overviewText.setText(movie.getOverview());
-            langText.setText(movie.getLanguage().toUpperCase());
+            //langText.setText(movie.getLanguage().toUpperCase());
             release_dateText.setText(movie.getRelease_date());
             String votes_text = movie.getVotings() + " votes";
             votingsText.setText(votes_text);
@@ -153,11 +156,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
             new LoadReviews(framedReviewsUrl).execute(REVIEWS);
             Log.e(TAG, "Creating connection to " + framedUrl + " in the background");
 
-            Picasso.with(this)
+            /*Picasso.with(this)
                     .load(BASE_URL_IMAGE + SIZE + movie.getPoster_path())
                     .placeholder(android.R.drawable.stat_notify_error)
                     .error(R.drawable.movie_icon)
-                    .into(posterImage);
+                    .into(posterImage);*/
 
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
@@ -219,6 +222,20 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 }
             }
         });
+
+        playicon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (trailers != null) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(trailers.get(0)));
+                    if (intent.resolveActivity(v.getContext().getPackageManager()) != null)
+                        v.getContext().startActivity(intent);
+                    else
+                        Toast.makeText(v.getContext(), "No app available to perform this action", Toast.LENGTH_LONG).show();
+                } else
+                    Toast.makeText(getApplicationContext(), "Try again", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
@@ -277,14 +294,25 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 JSONObject mainObject = new JSONObject(result.toString());
                 JSONArray movies = mainObject.getJSONArray(RESULTS);
                 trailers = new ArrayList<>();
+                List<String> thumbnails = new ArrayList<>();
                 for (int i = 0; i < movies.length(); i++) {
                     JSONObject jsonObject = movies.getJSONObject(i);
                     trailers.add(YOUTUBE_BASE_URL + jsonObject.getString(KEY));
                     Log.e(TAG, "Extracted youtube url for trailer " + i + ": " + trailers.get(i));
+                    String required_thumbnail_url = THUMBNAIL_URL + movies.getJSONObject(i).getString(KEY) + "/0.jpg";
+                    thumbnails.add(required_thumbnail_url);
                 }
-                trailersAdapter = new TrailersAdapter(trailers);
-                recyclerView.setLayoutManager(new LinearLayoutManager(MovieDetailsActivity.this));
+                trailersAdapter = new TrailersAdapter(MovieDetailsActivity.this, trailers, thumbnails);
+                recyclerView.setLayoutManager(new LinearLayoutManager(MovieDetailsActivity.this, LinearLayoutManager.HORIZONTAL, false));
                 recyclerView.setAdapter(trailersAdapter);
+                String required_thumbnail_url = THUMBNAIL_URL + movies.getJSONObject(0).getString(KEY) + "/0.jpg";
+                Log.e(TAG, "Thumbnail URL extracted: " + required_thumbnail_url);
+                Picasso.with(MovieDetailsActivity.this)
+                        .load(required_thumbnail_url)
+                        .error(android.R.drawable.stat_notify_error)
+                        .placeholder(android.R.drawable.stat_notify_error)
+                        .fit()
+                        .into(movieThumbnail);
             } catch (JSONException e) {
                 Log.e(TAG, "Failed to parse json: " + e.toString());
             }
@@ -344,7 +372,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     //Log.e(TAG,"Adding Description: " + review.getDescription());
                     reviewList.add(review);
                 }
-                String reviewsText = reviewsArray.length() + " reviews";
+                String reviewsText = reviewsArray.length() + " reviews>";
                 reviews.setText(reviewsText);
             } catch (JSONException e) {
                 Log.e(TAG, "Failed to parse json: " + e.toString());

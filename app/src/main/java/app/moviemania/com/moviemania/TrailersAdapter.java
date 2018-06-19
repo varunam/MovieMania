@@ -1,23 +1,31 @@
 package app.moviemania.com.moviemania;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHolder> {
     List<String> trailers;
+    List<String> thumbnails;
+    Context context;
+    private static final String TAG = TrailersAdapter.class.getSimpleName();
 
-
-    public TrailersAdapter(List<String> trailers) {
+    public TrailersAdapter(Context context, List<String> trailers, List<String> thumbnails) {
         this.trailers = trailers;
+        this.thumbnails = thumbnails;
+        this.context = context;
     }
 
     @NonNull
@@ -30,7 +38,14 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull TrailersAdapter.ViewHolder holder, final int position) {
 
-        holder.textView.setText("Trailer " + (position + 1));
+        Log.e(TAG, "Thumbnail URL extracted: " + thumbnails.get(position));
+        Picasso.with(context)
+                .load(thumbnails.get(position))
+                .error(android.R.drawable.stat_notify_error)
+                .placeholder(android.R.drawable.stat_notify_error)
+                .fit()
+                .into(holder.trailerThumbnails);
+
         holder.layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -50,12 +65,12 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         View layout;
-        TextView textView;
+        ImageView trailerThumbnails;
 
         public ViewHolder(View itemView) {
             super(itemView);
             layout = itemView;
-            textView = itemView.findViewById(R.id.trailer_item);
+            trailerThumbnails = itemView.findViewById(R.id.trailer_item);
         }
     }
 }
