@@ -226,14 +226,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
         playicon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (trailers != null) {
+                if (trailers != null && trailers.size() > 0) {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(trailers.get(0)));
                     if (intent.resolveActivity(v.getContext().getPackageManager()) != null)
                         v.getContext().startActivity(intent);
                     else
                         Toast.makeText(v.getContext(), "No app available to perform this action", Toast.LENGTH_LONG).show();
                 } else
-                    Toast.makeText(getApplicationContext(), "Try again", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "No trailer found", Toast.LENGTH_LONG).show();
             }
         });
     }

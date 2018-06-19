@@ -19,6 +19,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:tint="#918b8b"
+                android:transitionName="imageTransition"
                 android:tintMode="multiply" />
 
             <ImageView
@@ -184,6 +185,7 @@
             android:layout_marginTop="10dp"
             android:fontFamily="sans-serif"
             android:text="overview"
+            android:transitionName="overviewTransition"
             android:textAlignment="inherit"
             android:textStyle="italic" />
 

@@ -1,9 +1,12 @@
 package app.moviemania.com.moviemania;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,9 +53,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View v) {
                 Movie movie = movieList.get(position);
+                Pair[] pairs = new Pair[2];
+                pairs[0] = new Pair<View, String>(holder.poster, "imageTransition");
+                pairs[1] = new Pair<View, String>(holder.title, "overviewTransition");
+
+                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) v.getContext(), pairs);
                 Intent intent = new Intent(v.getContext(), MovieDetailsActivity.class);
                 intent.putExtra(MOVIE_KEY, movie);
-                v.getContext().startActivity(intent);
+                v.getContext().startActivity(intent, options.toBundle());
             }
         });
 
